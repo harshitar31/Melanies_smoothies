@@ -14,7 +14,6 @@ st.write('The name on your Smoothie will be:', name_on_order)
 conn = st.connection("snowflake")
 session = conn.session()
 my_dataframe = session.table("smoothies.public.fruit_options").select(col('FRUIT_NAME'))
-#st.dataframe(data=my_dataframe, use_container_width=True)
 
 ingredients_list = st.multiselect(
     'Choose up to 5 ingredients:'
@@ -28,9 +27,22 @@ if ingredients_list:
     for fruit_chosen in ingredients_list:
         ingredients_string += fruit_chosen + ' '
 
-        st.subheader(fruit_chosen + ' Nutrition Information')
-        smoothiefroot_response = requests.get("https://my.smoothiefroot.com/api/fruit/" + fruit_chosen)
-        sf_df = st.dataframe(data=smoothiefroot_response.json(), use_container_width=True)
+        # Get the SEARCH_ON value for this fruit
+        search_on_query = f"""select search_on from smoothies.public.fruit_options 
+                             where fruit_name = '{fruit_chosen}'"""
+        search_on_result = session.sql(search_on_query).collect()
+        
+        if search_on_result:
+            search_on_value = search_on_result[0][0]
+            
+            st.subheader(fruit_chosen + ' Nutrition Information')
+            
+            try:
+                smoothiefroot_response = requests.get("https://my.smoothiefroot.com/api/fruit/" + search_on_value)
+                smoothiefroot_response.raise_for_status()
+                sf_df = st.dataframe(data=smoothiefroot_response.json(), use_container_width=True)
+            except Exception as e:
+                st.error(f"Could not fetch data for {fruit_chosen}: {str(e)}")
 
     my_insert_stmt = """ insert into smoothies.public.orders(ingredients, name_on_order)
             values ('""" + ingredients_string + """','"""+name_on_order+"""')"""
@@ -43,13 +55,3 @@ if ingredients_list:
         session.sql(my_insert_stmt).collect()
     
         st.success('Your Smoothie is ordered, '+name_on_order+'!', icon="✅")
-
-# import requests
-
-# # st.subheader("New section to display smoothiefroot nutrition information")
-
-# smoothiefroot_response = requests.get("https://my.smoothiefroot.com/api/fruit/watermelon")
-# # st.text(smoothiefroot_response.json())
-
-
-# fruityveg_df = st.dataframe(data=smoothiefroot_response.json(), use_container_width=True)
