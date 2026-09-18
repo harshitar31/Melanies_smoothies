@@ -45,7 +45,7 @@ import streamlit as st
 
 st.title("Display smoothieroot nutrition information")
 
-response = requests.get("https://my.smoothieroot.com/api/fruit/watermelon")
+response = requests.get("https://my.smoothiefroot.com/api/fruit/watermelon")
 smoothieroot_response = response.json()
 
 st.json(data=smoothieroot_response.json(), use_container_width=True)
