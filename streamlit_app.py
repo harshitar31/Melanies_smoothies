@@ -39,13 +39,11 @@ if ingredients_list:
     
         st.success('Your Smoothie is ordered, '+name_on_order+'!', icon="✅")
 
-
 import requests
-import streamlit as st
 
-st.title("Display smoothieroot nutrition information")
+# st.subheader("New section to display smoothiefroot nutrition information")
 
-response = requests.get("https://my.smoothiefroot.com/api/fruit/watermelon")
-smoothieroot_response = response.json()
+smoothiefroot_response = requests.get("https://my.smoothiefroot.com/api/fruit/watermelon")
+st.text(smoothiefroot_response.json())
 
-st.json(smoothieroot_response)
+fruityveg_df = st.dataframe(data=smoothiefroot_response.json(), use_container_width=True)
