@@ -41,11 +41,22 @@ if ingredients_list:
 
 
 import requests
-import streamlit as st
 
 st.title("Display smoothieroot nutrition information")
 
-response = requests.get("https://my.smoothiefroot.com/api/fruit/watermelon")
-smoothieroot_response = response.json()
-
-st.json(data=smoothieroot_response, use_container_width=True)
+try:
+    response = requests.get("https://my.smoothiefroot.com/api/fruit/watermelon")
+    response.raise_for_status()
+    smoothieroot_response = response.json()
+    
+    st.write("Response type:", type(smoothieroot_response))
+    st.write("Response content:", smoothieroot_response)
+    
+    st.json(data=smoothieroot_response, use_container_width=True)
+    
+except requests.exceptions.RequestException as e:
+    st.error(f"API request failed: {e}")
+except ValueError as e:
+    st.error(f"Invalid JSON: {e}")
+except Exception as e:
+    st.error(f"Error: {type(e).__name__}: {e}")
