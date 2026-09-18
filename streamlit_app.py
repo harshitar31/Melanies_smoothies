@@ -27,12 +27,12 @@ if ingredients_list:
             values ('""" + ingredients_string + """','"""+name_on_order+"""')"""
 
     st.write(my_insert_stmt)
-    
+
     time_to_insert = st.button('Submit Order')
-    
+
     if time_to_insert:
         session.sql(my_insert_stmt).collect()
-    
+
         st.success('Your Smoothie is ordered!', icon="✅")
 
 # NEW SECTION: Display nutrition info
@@ -44,12 +44,12 @@ if ingredients_list:
         search_on_query = f"""select search_on from smoothies.public.fruit_options 
                              where fruit_name = '{fruit_chosen}'"""
         search_on_result = session.sql(search_on_query).collect()
-        
+
         if search_on_result:
             search_on_value = search_on_result[0][0]
-            
+
             st.subheader(fruit_chosen + ' Nutrition Information')
-            
+
             try:
                 smoothiefroot_response = requests.get("https://my.smoothiefroot.com/api/fruit/" + search_on_value)
                 sf_df = st.dataframe(data=smoothiefroot_response.json(), use_container_width=True)
